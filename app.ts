@@ -1,9 +1,9 @@
-const express = require("express");
-const cors = require("cors");
-const app = express();
+import express, { Express, Request, Response } from "express";
+import cors, { CorsOptions } from "cors";
 
+const app = express();
 const port = process.env.APP_PORT;
-const corsOptions = {
+const corsOptions: CorsOptions = {
   origin: process.env.CORS_ORIGIN,
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
