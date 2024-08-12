@@ -1,8 +1,10 @@
 import express, { Application, NextFunction, Request, Response } from "express";
 import cors, { CorsOptions } from "cors";
 import cloudinary from "cloudinary";
-import cloudinaryConfig from "./configs/Cloudinary.conf";
+import cloudinaryConfig from "./configs/cloudinary.conf";
 import uploadMiddleware from "./middlewares/upload.middleware";
+import routes, { Route } from "./routes";
+import { connectDatabase } from "./db/connect.db";
 
 const app: Application = express();
 const port = process.env.APP_PORT || (3000 as number);
@@ -15,16 +17,12 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+connectDatabase();
 cloudinary.v2.config(cloudinaryConfig);
-const upload = uploadMiddleware("photos");
 
-const cloudinaryImageUploadMethod = async (file: any) => {
-  return new Promise((resolve) => {
-    cloudinary.v2.uploader.upload(file, (_err: any, res: any) => {
-      resolve({
-        res: res.secure_url,
-      });
-    });
+const useRouters = (app: Application, routes: Route[]) => {
+  routes.forEach((route: Route) => {
+    app.use("/api" + route.url, route.router);
   });
 };
 
@@ -32,22 +30,7 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-app.post(
-  "/photos",
-  upload.single("img"),
-  async (req: Request, res: Response, next: NextFunction) => {
-    if (!req.file) {
-      // No file was uploaded
-      return res.status(400).json({ error: "No file uploaded" });
-    }
-
-    // File upload successful
-    const fileUrl = req.file.path; // URL of the uploaded file in Cloudinary
-
-    // Perform any additional logic or save the file URL to a database
-    res.status(200).json({ success: true, fileUrl: fileUrl });
-  }
-);
+useRouters(app, routes);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
