@@ -1,8 +1,7 @@
-import express, { Application, NextFunction, Request, Response } from "express";
+import express, { Application } from "express";
 import cors, { CorsOptions } from "cors";
 import cloudinary from "cloudinary";
 import cloudinaryConfig from "./configs/cloudinary.conf";
-import uploadMiddleware from "./middlewares/upload.middleware";
 import routes, { Route } from "./routes";
 import { connectDatabase } from "./db/connect.db";
 
