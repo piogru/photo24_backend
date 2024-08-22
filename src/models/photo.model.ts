@@ -1,18 +1,18 @@
-import mongoose, { Schema, Model, Document } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-type PhotoDocument = Document & {
+interface IPhoto {
   title: string;
   description: string | null;
   imgUrl: string;
-};
+}
 
 type PhotoInput = {
-  title: PhotoDocument["title"];
-  description: PhotoDocument["description"];
-  imgUrl: PhotoDocument["imgUrl"];
+  title: IPhoto["title"];
+  description: IPhoto["description"];
+  imgUrl: IPhoto["imgUrl"];
 };
 
-const photoSchema = new Schema(
+const photoSchema = new Schema<IPhoto>(
   {
     title: {
       type: Schema.Types.String,
@@ -34,9 +34,7 @@ const photoSchema = new Schema(
   }
 );
 
-const Photo: Model<PhotoDocument> = mongoose.model<PhotoDocument>(
-  "Photo",
-  photoSchema
-);
+const Photo = mongoose.model("Photo", photoSchema);
 
-export { Photo, PhotoInput, PhotoDocument };
+export { IPhoto, PhotoInput };
+export default Photo;
