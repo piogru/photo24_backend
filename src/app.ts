@@ -6,6 +6,7 @@ import cloudinaryConfig from "./configs/cloudinary.conf";
 import routes, { Route } from "./routes";
 import { connectDatabase } from "./db/connect.db";
 import { errorHandler } from "./middlewares/error.middleware";
+import helmet from "helmet";
 
 const useRouters = (app: Application, routes: Route[]) => {
   routes.forEach((route: Route) => {
@@ -20,10 +21,12 @@ const corsOptions: CorsOptions = {
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 
+app.use(helmet());
 app.use(cookieParser());
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.disable("x-powered-by");
 
 connectDatabase();
 cloudinary.v2.config(cloudinaryConfig);
