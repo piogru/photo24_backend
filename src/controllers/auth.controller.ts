@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
+import asyncHandler from "express-async-handler";
 import User from "../models/user.model";
 import { clearToken, generateToken } from "../utils/auth.util";
 
-const signupUser = async (req: Request, res: Response) => {
+const signupUser = asyncHandler(async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
   const userExists = await User.findOne({ email });
 
@@ -28,9 +29,9 @@ const signupUser = async (req: Request, res: Response) => {
       .status(400)
       .json({ message: "An error occurred while creating the user" });
   }
-};
+});
 
-const authenticateUser = async (req: Request, res: Response) => {
+const authenticateUser = asyncHandler(async (req: Request, res: Response) => {
   const { userId, password } = req.body; // userId = email/username
   const user = await User.findOne({ userId });
 
@@ -44,7 +45,7 @@ const authenticateUser = async (req: Request, res: Response) => {
   } else {
     res.status(401).json({ message: "User not found / password incorrect" });
   }
-};
+});
 
 const logoutUser = (req: Request, res: Response) => {
   clearToken(res);

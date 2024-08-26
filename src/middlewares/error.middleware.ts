@@ -7,6 +7,7 @@ const errorHandler = (
   next: NextFunction
 ) => {
   console.error(error.stack);
+
   if (error instanceof AuthenticationError) {
     res.status(401).json({ message: "Unauthorized: " + error.message });
   } else {
