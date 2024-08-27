@@ -5,7 +5,9 @@ import { clearToken, generateToken } from "../utils/auth.util";
 
 const signupUser = asyncHandler(async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
-  const userExists = await User.findOne({ email });
+  const userExists = await User.findOne({
+    $or: [{ name: name }, { email: email }],
+  });
 
   if (userExists) {
     res.status(400).json({ message: "The user already exists" });
@@ -33,7 +35,9 @@ const signupUser = asyncHandler(async (req: Request, res: Response) => {
 
 const authenticateUser = asyncHandler(async (req: Request, res: Response) => {
   const { userId, password } = req.body; // userId = email/username
-  const user = await User.findOne({ userId });
+  const user = await User.findOne({
+    $or: [{ name: userId }, { email: userId }],
+  });
 
   if (user && (await user.comparePassword(password))) {
     generateToken(res, user._id);
