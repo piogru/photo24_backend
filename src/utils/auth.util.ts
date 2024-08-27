@@ -8,16 +8,23 @@ const generateToken = (res: Response, userId: string | Types.ObjectId) => {
     expiresIn: "1h",
   });
 
-  res.cookie("jwt", token, {
+  // Credentials
+  res.cookie("token", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV !== "dev",
-    sameSite: "strict",
+    sameSite: "none",
+    maxAge: 60 * 60 * 1000,
+  });
+  // Auth expiration, accessible in frontend
+  res.cookie("auth", "", {
+    secure: process.env.NODE_ENV !== "dev",
+    sameSite: "none",
     maxAge: 60 * 60 * 1000,
   });
 };
 
 const clearToken = (res: Response) => {
-  res.cookie("jwt", "", {
+  res.cookie("token", "", {
     httpOnly: true,
     expires: new Date(0),
   });

@@ -19,10 +19,11 @@ const port = process.env.APP_PORT || 3000;
 const corsOptions: CorsOptions = {
   origin: process.env.CORS_ORIGIN,
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+  credentials: true,
 };
 
 app.use(helmet());
-app.use(cookieParser());
+app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
