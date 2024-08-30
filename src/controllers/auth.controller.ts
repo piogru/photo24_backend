@@ -33,7 +33,7 @@ const signupUser = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
-const authenticateUser = asyncHandler(async (req: Request, res: Response) => {
+const loginUser = asyncHandler(async (req: Request, res: Response) => {
   const { userId, password } = req.body; // userId = email/username
   const user = await User.findOne({
     $or: [{ name: userId }, { email: userId }],
@@ -51,9 +51,14 @@ const authenticateUser = asyncHandler(async (req: Request, res: Response) => {
   }
 });
 
+// /me
+const getUser = async (req: Request, res: Response) => {
+  res.status(200).json({ user: req.user });
+};
+
 const logoutUser = (req: Request, res: Response) => {
   clearToken(res);
   res.status(200).json({ message: "User logged out" });
 };
 
-export { signupUser, authenticateUser, logoutUser };
+export { signupUser, loginUser, getUser as authenticateUser, logoutUser };

@@ -26,7 +26,15 @@ const generateToken = (res: Response, userId: string | Types.ObjectId) => {
 const clearToken = (res: Response) => {
   res.cookie("token", "", {
     httpOnly: true,
+    secure: process.env.NODE_ENV !== "dev",
     expires: new Date(0),
+    sameSite: "none",
+  });
+  res.cookie("auth", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV !== "dev",
+    expires: new Date(0),
+    sameSite: "none",
   });
 };
 
