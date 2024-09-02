@@ -13,7 +13,11 @@ export interface Route {
 const routes: Route[] = [
   { url: "/auth", middlewares: [], router: authRouter },
   { url: "/photos", middlewares: [authenticate], router: photosRouter },
-  { url: "/users", middlewares: [authenticate], router: userRouter },
+  {
+    url: "/users",
+    middlewares: [authenticate],
+    router: userRouter,
+  },
 ];
 
 export default routes;
