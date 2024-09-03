@@ -1,10 +1,4 @@
-// declare global {
-//   namespace Express {
-//     interface Request {
-//       user?: UserInfo | null;
-//     }
-//   }
-// }
+import UserInfo from "./user-info.type";
 
 declare namespace Express {
   interface Request {
