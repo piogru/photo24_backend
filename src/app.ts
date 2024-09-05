@@ -43,7 +43,7 @@ app.use(
     store: mongoStore,
     cookie: {
       secure: process.env.APP_ENV !== "dev",
-      sameSite: "none",
+      sameSite: process.env.APP_ENV !== "dev" ? "none" : "lax",
       httpOnly: true,
     },
   })
