@@ -20,10 +20,8 @@ const signupUser = asyncHandler(async (req: Request, res: Response) => {
   });
 
   if (user) {
-    req.login(user, async (error) => {
-      res
-        .status(201)
-        .json({ user: { id: user.id, name: user.name, email: user.email } });
+    req.login(user, async () => {
+      res.status(201).json({ id: user.id, name: user.name, email: user.email });
     });
   } else {
     res
@@ -41,9 +39,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
         return next(error);
       }
       req.login(user, async () => {
-        return res.json({
-          user: { id: user._id, name: user.name, email: user.email },
-        });
+        return res.json({ id: user._id, name: user.name, email: user.email });
       });
     }
   )(req, res, next);
@@ -52,9 +48,14 @@ const loginUser = asyncHandler(async (req, res, next) => {
 // /me
 const getUser = async (req: Request, res: Response) => {
   const user = req.user;
-  res
-    .status(200)
-    .json({ user: { id: user.id, name: user.name, email: user.email } });
+
+  if (user) {
+    res.status(200).json({ id: user._id, name: user.name, email: user.email });
+  } else {
+    res
+      .status(400)
+      .json({ message: "An error occurred while fetching the user" });
+  }
 };
 
 const logoutUser = (req: Request, res: Response, next: NextFunction) => {
