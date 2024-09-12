@@ -31,5 +31,5 @@ const photoSchema = new Schema<IPhoto>(
 
 const Photo = mongoose.model("Photo", photoSchema);
 
-export { IPhoto, PhotoInput };
+export { IPhoto, PhotoInput, photoSchema };
 export default Photo;
