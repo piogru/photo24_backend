@@ -10,6 +10,7 @@ import passport from "passport";
 import authStrategyLocal from "./utils/passport.util";
 import session from "express-session";
 import mongoStore from "./db/store.db";
+import mongoose from "mongoose";
 
 const useRouters = (app: Application, routes: Route[]) => {
   routes.forEach((route: Route) => {
@@ -28,6 +29,7 @@ const corsOptions: CorsOptions = {
 
 connectDatabase();
 cloudinary.v2.config(cloudinaryConfig);
+mongoose.Schema.Types.String.checkRequired((v) => typeof v === "string");
 
 passport.use("local", authStrategyLocal);
 
