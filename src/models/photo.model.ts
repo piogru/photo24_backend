@@ -1,31 +1,26 @@
 import mongoose, { Schema } from "mongoose";
 
 interface IPhoto {
-  title: string;
-  description: string | null;
-  imgUrl: string;
+  url: string;
+  altText: string;
 }
 
 type PhotoInput = {
-  title: IPhoto["title"];
-  description: IPhoto["description"];
-  imgUrl: IPhoto["imgUrl"];
+  url: IPhoto["url"];
+  altText: IPhoto["altText"];
 };
 
 const photoSchema = new Schema<IPhoto>(
   {
-    title: {
-      type: Schema.Types.String,
-      required: true,
-    },
-    description: {
-      type: Schema.Types.String,
-      default: null,
-    },
-    imgUrl: {
+    url: {
       type: Schema.Types.String,
       required: true,
       unique: true,
+    },
+    altText: {
+      type: Schema.Types.String,
+      required: false,
+      default: "",
     },
   },
   {
