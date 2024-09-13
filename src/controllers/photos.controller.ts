@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { Photo, PhotoInput } from "../models/photo.model";
+import Photo, { PhotoInput } from "../models/photo.model";
 
 async function getAllPhotos(req: Request, res: Response) {
   const photos = await Photo.find().sort("-createdAt").exec();
@@ -21,22 +21,16 @@ async function getPhoto(req: Request, res: Response) {
 }
 
 async function createPhoto(req: Request, res: Response) {
-  const { description, title } = req.body;
+  const { altText = "" } = req.body;
 
-  if (!title || !description) {
-    return res.status(422).json({
-      message: "The fields title and description are required",
-    });
-  }
   if (!req.file) {
     return res.status(422).json({ message: "No file uploaded" });
   }
 
-  const imgUrl = req.file.path; // URL of the uploaded file in Cloudinary
+  const url = req.file.path; // URL of the uploaded file in Cloudinary
   const photoInput: PhotoInput = {
-    title,
-    description,
-    imgUrl,
+    altText,
+    url,
   };
   const photoCreated = await Photo.create(photoInput);
 
@@ -45,7 +39,7 @@ async function createPhoto(req: Request, res: Response) {
 
 async function updatePhoto(req: Request, res: Response) {
   const { id } = req.params;
-  const { description, title } = req.body;
+  const { altText = "" } = req.body;
 
   const photo = await Photo.findOne({ _id: id });
 
@@ -55,15 +49,9 @@ async function updatePhoto(req: Request, res: Response) {
       .json({ message: `Photo with id "${id}" not found.` });
   }
 
-  if (!title || !description) {
-    return res
-      .status(422)
-      .json({ message: "The fields name and description are required" });
-  }
+  await Photo.updateOne({ _id: id }, { altText: altText });
 
-  await Photo.updateOne({ _id: id }, { name: title, description });
-
-  const photoUpdated = await Photo.findById(id, { name: title, description });
+  const photoUpdated = await Photo.findById(id, { altText });
 
   return res.status(200).json({ data: photoUpdated });
 }
