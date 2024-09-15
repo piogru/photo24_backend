@@ -5,7 +5,7 @@ import Photo, { IPhoto } from "../models/photo.model";
 async function getAllPosts(req: Request, res: Response) {
   const posts = await Post.find().sort("-createdAt").exec();
 
-  return res.status(200).json({ data: posts });
+  return res.status(200).json(posts);
 }
 
 async function getPost(req: Request, res: Response) {
@@ -16,7 +16,7 @@ async function getPost(req: Request, res: Response) {
     return res.status(404).json({ message: `Post with id "${id}" not found.` });
   }
 
-  return res.status(200).json({ data: post });
+  return res.status(200).json(post);
 }
 
 async function createPost(req: Request, res: Response) {
@@ -49,7 +49,7 @@ async function createPost(req: Request, res: Response) {
 
   console.log(postCreated);
 
-  return res.status(201).json({ data: postCreated });
+  return res.status(201).json(postCreated);
 }
 
 async function updatePost(req: Request, res: Response) {
@@ -66,7 +66,7 @@ async function updatePost(req: Request, res: Response) {
 
   const photoUpdated = await Post.findById(id, { altText });
 
-  return res.status(200).json({ data: photoUpdated });
+  return res.status(200).json(photoUpdated);
 }
 
 async function deletePost(req: Request, res: Response) {
