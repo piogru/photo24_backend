@@ -5,3 +5,5 @@ interface UserInfo {
   name: string;
   email: string;
 }
+
+export default UserInfo;

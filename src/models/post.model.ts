@@ -1,14 +1,19 @@
-import mongoose, { Schema } from "mongoose";
-import Photo, { IPhoto, photoSchema } from "./photo.model";
+import mongoose, { Schema, Types } from "mongoose";
+import { IPhoto, photoSchema } from "./photo.model";
+import { commentSchema, IComment } from "./comment.model";
 
 interface IPost {
+  user: Types.ObjectId;
   photos: IPhoto[];
   caption: string;
+  likes: number;
+  comments: IComment[];
   hideLikes: boolean;
   commentsOff: boolean;
 }
 
 type PostInput = {
+  user: IPost["user"];
   photos: IPost["photos"];
   caption: IPost["caption"];
   hideLikes: IPost["hideLikes"];
@@ -17,12 +22,18 @@ type PostInput = {
 
 const postSchema = new Schema<IPost>(
   {
+    user: { type: Schema.Types.ObjectId, ref: "User" },
     photos: [photoSchema],
     caption: {
       type: Schema.Types.String,
       required: true,
-      unique: true,
     },
+    likes: {
+      type: Schema.Types.Number,
+      required: true,
+      default: 0,
+    },
+    comments: [commentSchema],
     hideLikes: {
       type: Schema.Types.Boolean,
       required: true,
