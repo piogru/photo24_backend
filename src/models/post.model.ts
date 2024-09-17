@@ -3,6 +3,7 @@ import { IPhoto, photoSchema } from "./photo.model";
 import { commentSchema, IComment } from "./comment.model";
 
 interface IPost {
+  _id: Types.ObjectId;
   user: Types.ObjectId;
   photos: IPhoto[];
   caption: string;

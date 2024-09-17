@@ -1,6 +1,7 @@
 import mongoose, { Schema, Types } from "mongoose";
 
 interface ILike {
+  _id: Types.ObjectId;
   user: Types.ObjectId;
   target: Types.ObjectId;
   targetModel: "Post" | "Comment";

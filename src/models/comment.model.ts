@@ -1,6 +1,7 @@
 import mongoose, { Schema, Types } from "mongoose";
 
 interface IComment {
+  _id: Types.ObjectId;
   user: Types.ObjectId;
   target: Types.ObjectId;
   targetModel: "Post" | "Comment";
@@ -10,6 +11,7 @@ interface IComment {
 }
 
 type CommentInput = {
+  user: IComment["user"];
   content: IComment["content"];
   target: IComment["target"];
   targetModel: IComment["targetModel"];

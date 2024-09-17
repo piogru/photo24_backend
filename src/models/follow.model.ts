@@ -1,6 +1,7 @@
 import mongoose, { Schema, Types } from "mongoose";
 
 interface IFollow {
+  _id: Types.ObjectId;
   follower: Types.ObjectId;
   target: Types.ObjectId;
 }
