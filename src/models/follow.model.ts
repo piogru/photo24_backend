@@ -12,8 +12,8 @@ type FollowInput = {
 
 const followSchema = new Schema<IFollow>(
   {
-    follower: { type: Schema.Types.ObjectId, ref: "User" },
-    target: { type: Schema.Types.ObjectId, ref: "User" },
+    follower: { type: Schema.Types.ObjectId, required: true, ref: "User" },
+    target: { type: Schema.Types.ObjectId, required: true, ref: "User" },
   },
   {
     collection: "follows",

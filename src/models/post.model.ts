@@ -22,7 +22,7 @@ type PostInput = {
 
 const postSchema = new Schema<IPost>(
   {
-    user: { type: Schema.Types.ObjectId, ref: "User" },
+    user: { type: Schema.Types.ObjectId, required: true, ref: "User" },
     photos: [photoSchema],
     caption: {
       type: Schema.Types.String,
