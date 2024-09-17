@@ -1,8 +1,8 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Types } from "mongoose";
 
 interface IFollow {
-  follower: Schema.Types.ObjectId;
-  target: Schema.Types.ObjectId;
+  follower: Types.ObjectId;
+  target: Types.ObjectId;
 }
 
 type FollowInput = {
