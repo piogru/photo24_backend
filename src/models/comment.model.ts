@@ -49,7 +49,7 @@ commentSchema.add({
   replies: [commentSchema],
 });
 
-const Post = mongoose.model("Comment", commentSchema);
+const Comment = mongoose.model("Comment", commentSchema);
 
 export { IComment, CommentInput, commentSchema };
-export default Post;
+export default Comment;
