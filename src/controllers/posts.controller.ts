@@ -5,7 +5,10 @@ import Comment from "../models/comment.model";
 import Like from "../models/like.model";
 
 async function getAllPosts(req: Request, res: Response) {
-  const posts = await Post.find().sort("-createdAt").exec();
+  const posts = await Post.find()
+    .sort("-createdAt")
+    .populate("user", ["_id", "name"])
+    .exec();
 
   return res.status(200).json(posts);
 }
@@ -82,19 +85,40 @@ async function deletePost(req: Request, res: Response) {
   return res.status(200).json({ message: "Post deleted successfully." });
 }
 
+async function getCurrentUserLike(req: Request, res: Response) {
+  const { targetId } = req.params;
+  const user = req.user;
+
+  if (!targetId) {
+    return res.status(422).json({ message: "No like target specified" });
+  }
+  if (!user) {
+    return res.status(401).json({ message: "Could not identify user" });
+  }
+
+  const like = await Like.findOne({
+    user: user._id,
+    target: targetId,
+  }).exec();
+
+  return res.status(200).json(like);
+}
+
 async function likePost(req: Request, res: Response) {
-  const { id } = req.params;
+  const { targetId } = req.params;
   const user = req.user;
 
   if (!user) {
     return res.status(401).json({ message: "Could not identify user" });
   }
 
-  const like = await Like.findOne({ target: id, user: user?._id });
-  const post = await Post.findById(id);
+  const like = await Like.findOne({ target: targetId, user: user?._id });
+  const post = await Post.findById(targetId);
 
   if (!post) {
-    return res.status(404).json({ message: `Post with id "${id}" not found.` });
+    return res
+      .status(404)
+      .json({ message: `Post with id "${targetId}" not found.` });
   }
   if (like) {
     return res.status(422).json({ message: "Post has already been liked" });
@@ -102,28 +126,33 @@ async function likePost(req: Request, res: Response) {
 
   const createdDocument = await Like.create({
     user: user?._id,
-    target: id,
+    target: targetId,
     targetModel: "Post",
   });
+
+  await Post.findByIdAndUpdate(targetId, { $inc: { likes: 1 } });
 
   return res.status(201).json(createdDocument);
 }
 
 async function unlikePost(req: Request, res: Response) {
-  const { id } = req.params;
+  const { targetId } = req.params;
   const user = req.user;
 
-  const like = await Like.findOne({ target: id, user: user?._id });
+  const like = await Like.findOne({ target: targetId, user: user?._id });
 
   if (!like) {
     return res.status(422).json({ message: "Post hasn't been liked" });
   }
 
+  await like.deleteOne().exec();
+  await Post.findByIdAndUpdate(targetId, { $inc: { likes: -1 } });
+
   return res.status(200).json({ message: "Like removed successfully." });
 }
 
 async function createComment(req: Request, res: Response) {
-  const { id } = req.params;
+  const { targetId } = req.params;
   const { content } = req.body;
   const user = req.user;
 
@@ -136,7 +165,7 @@ async function createComment(req: Request, res: Response) {
 
   const createdDocument = await Comment.create({
     content,
-    target: id,
+    target: targetId,
     targetModel: "Post",
   });
 
@@ -149,6 +178,7 @@ export {
   createPost,
   updatePost,
   deletePost,
+  getCurrentUserLike,
   likePost,
   unlikePost,
   createComment,
