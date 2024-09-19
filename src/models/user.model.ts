@@ -29,6 +29,13 @@ const userSchema = new Schema<IUser>(
   {
     collection: "users",
     timestamps: true,
+    toJSON: {
+      versionKey: false,
+      transform: function (doc, ret, options) {
+        delete ret.password;
+        return ret;
+      },
+    },
   }
 );
 
