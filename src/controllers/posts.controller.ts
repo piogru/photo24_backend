@@ -15,7 +15,9 @@ async function getAllPosts(req: Request, res: Response) {
 
 async function getPost(req: Request, res: Response) {
   const { id } = req.params;
-  const post = await Post.findOne({ _id: id });
+  const post = await Post.findOne({ _id: id })
+    .populate("user", ["_id", "name"])
+    .exec();
 
   if (!post) {
     return res.status(404).json({ message: `Post with id "${id}" not found.` });

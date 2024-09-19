@@ -12,7 +12,7 @@ async function getCurrentUserFollow(req: Request, res: Response) {
     return res.status(401).json({ message: "Could not identify user" });
   }
 
-  const follow = await Follow.find({
+  const follow = await Follow.findOne({
     follower: user._id,
     target: targetId,
   }).exec();
@@ -38,7 +38,7 @@ async function getFollowing(req: Request, res: Response) {
 }
 
 async function follow(req: Request, res: Response) {
-  const { targetId } = req.body;
+  const { targetId } = req.params;
   const user = req.user;
 
   if (!targetId) {

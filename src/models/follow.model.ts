@@ -7,8 +7,8 @@ interface IFollow {
 }
 
 type FollowInput = {
-  follower: IFollow["follower"];
-  target: IFollow["target"];
+  follower: IFollow["follower"] | string | number;
+  target: IFollow["target"] | string | number;
 };
 
 const followSchema = new Schema<IFollow>(
