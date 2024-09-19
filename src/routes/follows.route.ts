@@ -9,8 +9,9 @@ import {
 const followsRouter = express.Router();
 
 followsRouter.get("/:targetId", getFollowers);
-followsRouter.get("/:followerId", getFollowing);
-followsRouter.post("/:target", follow);
-followsRouter.delete("/:target", unfollow);
+followsRouter.get("/:targetId/followers", getFollowers);
+followsRouter.get("/:followerId/following", getFollowing);
+followsRouter.post("/:targetId", follow);
+followsRouter.delete("/:targetId", unfollow);
 
 export default followsRouter;
