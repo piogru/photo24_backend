@@ -1,7 +1,8 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Types } from "mongoose";
 import bcrypt from "bcryptjs";
 
 interface IUser {
+  _id: Types.ObjectId;
   name: string;
   email: string;
   password: string;
@@ -28,6 +29,13 @@ const userSchema = new Schema<IUser>(
   {
     collection: "users",
     timestamps: true,
+    toJSON: {
+      versionKey: false,
+      transform: function (doc, ret, options) {
+        delete ret.password;
+        return ret;
+      },
+    },
   }
 );
 
@@ -46,5 +54,5 @@ userSchema.methods.comparePassword = async function (enteredPassword: string) {
 
 const User = mongoose.model("User", userSchema);
 
-export { IUser };
+export { IUser, userSchema };
 export default User;

@@ -1,16 +1,23 @@
 import { Request, Response } from "express";
 import Post, { PostInput } from "../models/post.model";
-import Photo, { IPhoto } from "../models/photo.model";
+import { IPhoto } from "../models/photo.model";
+import Comment from "../models/comment.model";
+import Like from "../models/like.model";
 
 async function getAllPosts(req: Request, res: Response) {
-  const posts = await Post.find().sort("-createdAt").exec();
+  const posts = await Post.find()
+    .sort("-createdAt")
+    .populate("user", ["_id", "name"])
+    .exec();
 
   return res.status(200).json(posts);
 }
 
 async function getPost(req: Request, res: Response) {
   const { id } = req.params;
-  const post = await Post.findOne({ _id: id });
+  const post = await Post.findOne({ _id: id })
+    .populate("user", ["_id", "name"])
+    .exec();
 
   if (!post) {
     return res.status(404).json({ message: `Post with id "${id}" not found.` });
@@ -21,6 +28,7 @@ async function getPost(req: Request, res: Response) {
 
 async function createPost(req: Request, res: Response) {
   const { caption, hideLikes, commentsOff, fileInfo } = req.body;
+  const user = req.user;
   const parsedFileInfo = fileInfo.map((stringifiedObj: string) =>
     JSON.parse(stringifiedObj)
   );
@@ -28,6 +36,9 @@ async function createPost(req: Request, res: Response) {
 
   if (!req.files) {
     return res.status(422).json({ message: "No file uploaded" });
+  }
+  if (!user) {
+    return res.status(401).json({ message: "Could not identify user" });
   }
 
   if (Array.isArray(req.files)) {
@@ -40,14 +51,13 @@ async function createPost(req: Request, res: Response) {
   }
 
   const postInput: PostInput = {
+    user: user._id,
     photos,
     caption,
     hideLikes: JSON.parse(hideLikes),
     commentsOff: JSON.parse(commentsOff),
   };
   const postCreated = await Post.create(postInput);
-
-  console.log(postCreated);
 
   return res.status(201).json(postCreated);
 }
@@ -77,4 +87,101 @@ async function deletePost(req: Request, res: Response) {
   return res.status(200).json({ message: "Post deleted successfully." });
 }
 
-export { getPost, getAllPosts, createPost, updatePost, deletePost };
+async function getCurrentUserLike(req: Request, res: Response) {
+  const { targetId } = req.params;
+  const user = req.user;
+
+  if (!targetId) {
+    return res.status(422).json({ message: "No like target specified" });
+  }
+  if (!user) {
+    return res.status(401).json({ message: "Could not identify user" });
+  }
+
+  const like = await Like.findOne({
+    user: user._id,
+    target: targetId,
+  }).exec();
+
+  return res.status(200).json(like);
+}
+
+async function likePost(req: Request, res: Response) {
+  const { targetId } = req.params;
+  const user = req.user;
+
+  if (!user) {
+    return res.status(401).json({ message: "Could not identify user" });
+  }
+
+  const like = await Like.findOne({ target: targetId, user: user?._id });
+  const post = await Post.findById(targetId);
+
+  if (!post) {
+    return res
+      .status(404)
+      .json({ message: `Post with id "${targetId}" not found.` });
+  }
+  if (like) {
+    return res.status(422).json({ message: "Post has already been liked" });
+  }
+
+  const createdDocument = await Like.create({
+    user: user?._id,
+    target: targetId,
+    targetModel: "Post",
+  });
+
+  await Post.findByIdAndUpdate(targetId, { $inc: { likes: 1 } });
+
+  return res.status(201).json(createdDocument);
+}
+
+async function unlikePost(req: Request, res: Response) {
+  const { targetId } = req.params;
+  const user = req.user;
+
+  const like = await Like.findOne({ target: targetId, user: user?._id });
+
+  if (!like) {
+    return res.status(422).json({ message: "Post hasn't been liked" });
+  }
+
+  await like.deleteOne().exec();
+  await Post.findByIdAndUpdate(targetId, { $inc: { likes: -1 } });
+
+  return res.status(200).json({ message: "Like removed successfully." });
+}
+
+async function createComment(req: Request, res: Response) {
+  const { targetId } = req.params;
+  const { content } = req.body;
+  const user = req.user;
+
+  if (!req.files) {
+    return res.status(422).json({ message: "No file uploaded" });
+  }
+  if (!user) {
+    return res.status(401).json({ message: "Could not identify user" });
+  }
+
+  const createdDocument = await Comment.create({
+    content,
+    target: targetId,
+    targetModel: "Post",
+  });
+
+  return res.status(201).json(createdDocument);
+}
+
+export {
+  getPost,
+  getAllPosts,
+  createPost,
+  updatePost,
+  deletePost,
+  getCurrentUserLike,
+  likePost,
+  unlikePost,
+  createComment,
+};
