@@ -6,6 +6,10 @@ interface IUser {
   name: string;
   email: string;
   password: string;
+  description: string;
+  posts: number;
+  followers: number;
+  following: number;
   comparePassword: (enteredPassword: string) => boolean;
 }
 
@@ -24,6 +28,22 @@ const userSchema = new Schema<IUser>(
     password: {
       type: Schema.Types.String,
       required: true,
+    },
+    description: {
+      type: Schema.Types.String,
+      default: "",
+    },
+    posts: {
+      type: Schema.Types.Number,
+      default: 0,
+    },
+    followers: {
+      type: Schema.Types.Number,
+      default: 0,
+    },
+    following: {
+      type: Schema.Types.Number,
+      default: 0,
     },
   },
   {
