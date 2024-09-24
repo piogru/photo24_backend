@@ -1,11 +1,17 @@
 import mongoose, { Schema, Types } from "mongoose";
 import bcrypt from "bcryptjs";
+import { IPhoto, photoSchema } from "./photo.model";
 
 interface IUser {
   _id: Types.ObjectId;
   name: string;
   email: string;
   password: string;
+  description: string;
+  profilePic?: IPhoto;
+  posts: number;
+  followers: number;
+  following: number;
   comparePassword: (enteredPassword: string) => boolean;
 }
 
@@ -25,6 +31,23 @@ const userSchema = new Schema<IUser>(
       type: Schema.Types.String,
       required: true,
     },
+    description: {
+      type: Schema.Types.String,
+      default: "",
+    },
+    profilePic: { type: photoSchema, required: false },
+    posts: {
+      type: Schema.Types.Number,
+      default: 0,
+    },
+    followers: {
+      type: Schema.Types.Number,
+      default: 0,
+    },
+    following: {
+      type: Schema.Types.Number,
+      default: 0,
+    },
   },
   {
     collection: "users",
@@ -33,6 +56,7 @@ const userSchema = new Schema<IUser>(
       versionKey: false,
       transform: function (doc, ret, options) {
         delete ret.password;
+        delete ret.email;
         return ret;
       },
     },

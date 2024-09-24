@@ -3,9 +3,11 @@ import Post, { PostInput } from "../models/post.model";
 import { IPhoto } from "../models/photo.model";
 import Comment from "../models/comment.model";
 import Like from "../models/like.model";
+import User from "../models/user.model";
 
 async function getAllPosts(req: Request, res: Response) {
-  const posts = await Post.find()
+  const query = req.query;
+  const posts = await Post.find(query)
     .sort("-createdAt")
     .populate("user", ["_id", "name"])
     .exec();
@@ -59,6 +61,8 @@ async function createPost(req: Request, res: Response) {
   };
   const postCreated = await Post.create(postInput);
 
+  await User.findByIdAndUpdate(user._id, { $inc: { posts: 1 } });
+
   return res.status(201).json(postCreated);
 }
 
@@ -81,8 +85,19 @@ async function updatePost(req: Request, res: Response) {
 
 async function deletePost(req: Request, res: Response) {
   const { id } = req.params;
+  const user = req.user;
 
-  await Post.findByIdAndDelete(id);
+  const post = await Post.findById(id);
+
+  if (!post) {
+    return res.status(404).json({ message: `Post with id "${id}" not found.` });
+  }
+  if (post.user !== user?._id) {
+    return res.status(401).json({ message: `User is not Post owner.` });
+  }
+
+  await User.findByIdAndUpdate(post.user, { $inc: { posts: -1 } });
+  await post.deleteOne();
 
   return res.status(200).json({ message: "Post deleted successfully." });
 }
