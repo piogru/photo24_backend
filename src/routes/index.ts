@@ -2,7 +2,7 @@ import { RequestHandler, Router } from "express";
 import { authenticate } from "../middlewares/auth.middleware";
 import photosRouter from "./photos.route";
 import authRouter from "./auth.route";
-import userRouter from "./user.route";
+import userRouter from "./users.route";
 import postsRouter from "./posts.route";
 import followsRouter from "./follows.route";
 
