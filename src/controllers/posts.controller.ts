@@ -6,7 +6,8 @@ import Like from "../models/like.model";
 import User from "../models/user.model";
 
 async function getAllPosts(req: Request, res: Response) {
-  const posts = await Post.find()
+  const query = req.query;
+  const posts = await Post.find(query)
     .sort("-createdAt")
     .populate("user", ["_id", "name"])
     .exec();
