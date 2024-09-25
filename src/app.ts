@@ -5,6 +5,7 @@ import cloudinaryConfig from "./configs/cloudinary.conf";
 import routes, { Route } from "./routes";
 import { connectDatabase } from "./db/connect.db";
 import { errorHandler } from "./middlewares/error.middleware";
+import compression from "compression";
 import helmet from "helmet";
 import passport from "passport";
 import authStrategyLocal from "./utils/passport.util";
@@ -33,6 +34,7 @@ mongoose.Schema.Types.String.checkRequired((v) => typeof v === "string");
 
 passport.use("local", authStrategyLocal);
 
+app.use(compression());
 app.use(helmet());
 app.use(cors(corsOptions));
 app.use(express.json());
