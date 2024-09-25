@@ -5,12 +5,64 @@ import { IPhoto } from "../models/photo.model";
 import Comment from "../models/comment.model";
 import Like from "../models/like.model";
 import User from "../models/user.model";
+import Follow from "../models/follow.model";
 
 const getAllPosts = asyncHandler(async (req: Request, res: Response) => {
   const query = req.query;
   const posts = await Post.find(query)
     .sort("-createdAt")
     .populate("user", ["_id", "name"])
+    .exec();
+
+  res.status(200).json(posts);
+});
+
+const getForYouPosts = asyncHandler(async (req: Request, res: Response) => {
+  const user = req.user;
+
+  if (!user) {
+    res.status(401).json({ message: "Could not identify user" });
+    return;
+  }
+
+  const posts = await Post.find({
+    createdAt: {
+      $gte: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 3),
+    },
+    user: { $nin: [user._id] },
+  })
+    .sort("-createdAt")
+    .populate("user", ["_id", "name", "profilePic"])
+    .exec();
+
+  res.status(200).json(posts);
+});
+
+const getFollowingPosts = asyncHandler(async (req: Request, res: Response) => {
+  const user = req.user;
+
+  if (!user) {
+    res.status(401).json({ message: "Could not identify user" });
+    return;
+  }
+
+  const followsGrouped = await Follow.aggregate([
+    { $match: { follower: user._id } },
+    { $group: { _id: "", targets: { $push: "$target" } } },
+    { $project: { _id: 0, targets: 1 } },
+  ]);
+
+  const followedUserIds =
+    followsGrouped.length === 1 ? followsGrouped[0].targets : [];
+
+  const posts = await Post.find({
+    createdAt: {
+      $gte: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 3),
+    },
+    user: { $in: followedUserIds },
+  })
+    .sort("-createdAt")
+    .populate("user", ["_id", "name", "profilePic"])
     .exec();
 
   res.status(200).json(posts);
@@ -206,6 +258,8 @@ const createComment = asyncHandler(async (req: Request, res: Response) => {
 export {
   getPost,
   getAllPosts,
+  getForYouPosts,
+  getFollowingPosts,
   createPost,
   updatePost,
   deletePost,
