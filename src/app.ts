@@ -44,8 +44,8 @@ app.use(
     saveUninitialized: false,
     store: mongoStore,
     cookie: {
-      secure: process.env.APP_ENV !== "dev",
-      sameSite: process.env.APP_ENV !== "dev" ? "none" : "lax",
+      secure: process.env.NODE_ENV !== "dev",
+      sameSite: process.env.NODE_ENV !== "dev" ? "none" : "lax",
       httpOnly: true,
     },
   })
