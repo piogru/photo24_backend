@@ -62,8 +62,6 @@ app.get("/", (req, res) => {
 
 useRouters(app, routes);
 app.get("*", function (req, res) {
-  console.log("[404]: ", req.path);
-
   res.status(404).send({ message: `${req.path} not found` });
 });
 
