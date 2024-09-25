@@ -6,6 +6,7 @@ import {
   getAllPosts,
   getCurrentUserLike,
   getFollowingPosts,
+  getForYouPosts,
   getPost,
   likePost,
   unlikePost,
@@ -17,6 +18,7 @@ const postsRouter = express.Router();
 const upload = uploadMiddleware("photos");
 
 postsRouter.get("/", getAllPosts);
+postsRouter.get("/for-you", getForYouPosts);
 postsRouter.get("/following", getFollowingPosts);
 postsRouter.get("/:id", getPost);
 postsRouter.post("/", upload.array("photos[]", 4), createPost);

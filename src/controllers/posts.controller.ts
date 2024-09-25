@@ -17,6 +17,27 @@ const getAllPosts = asyncHandler(async (req: Request, res: Response) => {
   res.status(200).json(posts);
 });
 
+const getForYouPosts = asyncHandler(async (req: Request, res: Response) => {
+  const user = req.user;
+
+  if (!user) {
+    res.status(401).json({ message: "Could not identify user" });
+    return;
+  }
+
+  const posts = await Post.find({
+    createdAt: {
+      $gte: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 3),
+    },
+    user: { $nin: [user._id] },
+  })
+    .sort("-createdAt")
+    .populate("user", ["_id", "name", "profilePic"])
+    .exec();
+
+  res.status(200).json(posts);
+});
+
 const getFollowingPosts = asyncHandler(async (req: Request, res: Response) => {
   const user = req.user;
 
@@ -237,6 +258,7 @@ const createComment = asyncHandler(async (req: Request, res: Response) => {
 export {
   getPost,
   getAllPosts,
+  getForYouPosts,
   getFollowingPosts,
   createPost,
   updatePost,
