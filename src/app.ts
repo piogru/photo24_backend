@@ -12,6 +12,7 @@ import authStrategyLocal from "./utils/passport.util";
 import session from "express-session";
 import mongoStore from "./db/store.db";
 import mongoose from "mongoose";
+import rateLimiter from "./configs/rateLimit.conf";
 
 const useRouters = (app: Application, routes: Route[]) => {
   routes.forEach((route: Route) => {
@@ -36,6 +37,7 @@ passport.use("local", authStrategyLocal);
 
 app.use(compression());
 app.use(helmet());
+app.use(rateLimiter);
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -62,8 +64,6 @@ app.get("/", (req, res) => {
 
 useRouters(app, routes);
 app.get("*", function (req, res) {
-  console.log("[404]: ", req.path);
-
   res.status(404).send({ message: `${req.path} not found` });
 });
 
