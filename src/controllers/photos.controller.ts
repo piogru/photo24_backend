@@ -1,30 +1,31 @@
 import { Request, Response } from "express";
+import asyncHandler from "express-async-handler";
 import Photo, { PhotoInput } from "../models/photo.model";
 
-async function getAllPhotos(req: Request, res: Response) {
+const getAllPhotos = asyncHandler(async (req: Request, res: Response) => {
   const photos = await Photo.find().sort("-createdAt").exec();
 
-  return res.status(200).json({ data: photos });
-}
+  res.status(200).json({ data: photos });
+});
 
-async function getPhoto(req: Request, res: Response) {
+const getPhoto = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   const photo = await Photo.findOne({ _id: id });
 
   if (!photo) {
-    return res
-      .status(404)
-      .json({ message: `Photo with id "${id}" not found.` });
+    res.status(404).json({ message: `Photo with id "${id}" not found.` });
+    return;
   }
 
-  return res.status(200).json({ data: photo });
-}
+  res.status(200).json({ data: photo });
+});
 
-async function createPhoto(req: Request, res: Response) {
+const createPhoto = asyncHandler(async (req: Request, res: Response) => {
   const { altText = "" } = req.body;
 
   if (!req.file) {
-    return res.status(422).json({ message: "No file uploaded" });
+    res.status(422).json({ message: "No file uploaded" });
+    return;
   }
 
   const url = req.file.path; // URL of the uploaded file in Cloudinary
@@ -34,34 +35,33 @@ async function createPhoto(req: Request, res: Response) {
   };
   const photoCreated = await Photo.create(photoInput);
 
-  return res.status(201).json({ data: photoCreated });
-}
+  res.status(201).json({ data: photoCreated });
+});
 
-async function updatePhoto(req: Request, res: Response) {
+const updatePhoto = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   const { altText = "" } = req.body;
 
   const photo = await Photo.findOne({ _id: id });
 
   if (!photo) {
-    return res
-      .status(404)
-      .json({ message: `Photo with id "${id}" not found.` });
+    res.status(404).json({ message: `Photo with id "${id}" not found.` });
+    return;
   }
 
   await Photo.updateOne({ _id: id }, { altText: altText });
 
   const photoUpdated = await Photo.findById(id, { altText });
 
-  return res.status(200).json({ data: photoUpdated });
-}
+  res.status(200).json({ data: photoUpdated });
+});
 
-async function deletePhoto(req: Request, res: Response) {
+const deletePhoto = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
 
   await Photo.findByIdAndDelete(id);
 
-  return res.status(200).json({ message: "Photo deleted successfully." });
-}
+  res.status(200).json({ message: "Photo deleted successfully." });
+});
 
 export { getPhoto, getAllPhotos, createPhoto, updatePhoto, deletePhoto };

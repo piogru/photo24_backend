@@ -1,52 +1,59 @@
 import { Request, Response } from "express";
+import asyncHandler from "express-async-handler";
 import Follow, { FollowInput } from "../models/follow.model";
 import User from "../models/user.model";
 
-async function getCurrentUserFollow(req: Request, res: Response) {
-  const { targetId } = req.params;
-  const user = req.user;
+const getCurrentUserFollow = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { targetId } = req.params;
+    const user = req.user;
 
-  if (!targetId) {
-    return res.status(422).json({ message: "No follow target specified" });
+    if (!targetId) {
+      res.status(422).json({ message: "No follow target specified" });
+      return;
+    }
+    if (!user) {
+      res.status(401).json({ message: "Could not identify user" });
+      return;
+    }
+
+    const follow = await Follow.findOne({
+      follower: user._id,
+      target: targetId,
+    }).exec();
+
+    res.status(200).json(follow);
   }
-  if (!user) {
-    return res.status(401).json({ message: "Could not identify user" });
-  }
-
-  const follow = await Follow.findOne({
-    follower: user._id,
-    target: targetId,
-  }).exec();
-
-  return res.status(200).json(follow);
-}
+);
 
 // get followers of target user
-async function getFollowers(req: Request, res: Response) {
+const getFollowers = asyncHandler(async (req: Request, res: Response) => {
   const { targetId } = req.params;
   const followers = await Follow.find({ target: targetId }).exec();
 
-  return res.status(200).json(followers);
-}
+  res.status(200).json(followers);
+});
 
 // get targets that user (follower) is following
-async function getFollowing(req: Request, res: Response) {
+const getFollowing = asyncHandler(async (req: Request, res: Response) => {
   const { followerId } = req.params;
 
   const followers = await Follow.find({ follower: followerId }).exec();
 
-  return res.status(200).json(followers);
-}
+  res.status(200).json(followers);
+});
 
-async function follow(req: Request, res: Response) {
+const follow = asyncHandler(async (req: Request, res: Response) => {
   const { targetId } = req.params;
   const user = req.user;
 
   if (!targetId) {
-    return res.status(422).json({ message: "No follow target specified" });
+    res.status(422).json({ message: "No follow target specified" });
+    return;
   }
   if (!user) {
-    return res.status(401).json({ message: "Could not identify user" });
+    res.status(401).json({ message: "Could not identify user" });
+    return;
   }
 
   const follow = await Follow.findOne({
@@ -54,7 +61,8 @@ async function follow(req: Request, res: Response) {
     target: targetId,
   }).exec();
   if (follow) {
-    return res.status(422).json({ message: "User is already being followed" });
+    res.status(422).json({ message: "User is already being followed" });
+    return;
   }
 
   const followInput: FollowInput = {
@@ -66,26 +74,27 @@ async function follow(req: Request, res: Response) {
   await User.findOneAndUpdate({ _id: user._id }, { $inc: { following: 1 } });
   await User.findOneAndUpdate({ _id: targetId }, { $inc: { followers: 1 } });
 
-  return res.status(201).json(created);
-}
+  res.status(201).json(created);
+});
 
-async function unfollow(req: Request, res: Response) {
+const unfollow = asyncHandler(async (req: Request, res: Response) => {
   const { targetId } = req.params;
   const user = req.user;
 
   if (!targetId) {
-    return res.status(422).json({ message: "No follow target specified" });
+    res.status(422).json({ message: "No follow target specified" });
+    return;
   }
   if (!user) {
-    return res.status(401).json({ message: "Could not identify user" });
+    res.status(401).json({ message: "Could not identify user" });
+    return;
   }
 
   await Follow.findOneAndDelete({ follower: user?._id, target: targetId });
-
   await User.findOneAndUpdate({ _id: user._id }, { $dec: { following: -1 } });
   await User.findOneAndUpdate({ _id: targetId }, { $inc: { followers: -1 } });
 
-  return res.status(200).json({ message: "Post deleted successfully." });
-}
+  res.status(200).json({ message: "Post deleted successfully." });
+});
 
 export { getCurrentUserFollow, getFollowers, getFollowing, follow, unfollow };

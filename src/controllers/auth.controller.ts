@@ -46,7 +46,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
 });
 
 // /me
-const getUser = async (req: Request, res: Response) => {
+const getUser = asyncHandler(async (req: Request, res: Response) => {
   const user = req.user;
 
   if (user) {
@@ -56,15 +56,17 @@ const getUser = async (req: Request, res: Response) => {
       .status(400)
       .json({ message: "An error occurred while fetching the user" });
   }
-};
+});
 
-const logoutUser = (req: Request, res: Response, next: NextFunction) => {
-  req.logout((err) => {
-    if (err) {
-      return next(err);
-    }
-    res.status(200).json({ message: "User logged out" });
-  });
-};
+const logoutUser = asyncHandler(
+  (req: Request, res: Response, next: NextFunction) => {
+    req.logout((err) => {
+      if (err) {
+        return next(err);
+      }
+      res.status(200).json({ message: "User logged out" });
+    });
+  }
+);
 
 export { signupUser, loginUser, getUser, logoutUser };
