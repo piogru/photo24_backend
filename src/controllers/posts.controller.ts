@@ -34,8 +34,6 @@ const getFollowingPosts = asyncHandler(async (req: Request, res: Response) => {
   const followedUserIds =
     followsGrouped.length === 1 ? followsGrouped[0].targets : [];
 
-  console.log("users list?", followedUserIds);
-
   const posts = await Post.find({
     createdAt: {
       $gte: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 3),
