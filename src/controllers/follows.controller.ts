@@ -55,6 +55,10 @@ const follow = asyncHandler(async (req: Request, res: Response) => {
     res.status(401).json({ message: "Could not identify user" });
     return;
   }
+  if (targetId === user._id.toString()) {
+    res.status(422).json({ message: "Cannot follow self" });
+    return;
+  }
 
   const follow = await Follow.findOne({
     follower: user._id,
