@@ -1,20 +1,35 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import User from "../models/user.model";
+import { parseBoolean } from "../utils/query.util";
 
 type UserFilters = {
   email?: string;
+  name?: string;
+  partial?: string;
 };
 
-const getUsers = asyncHandler(async (req: Request, res: Response) => {
-  const users = await User.find(req.query);
+const getUsers = asyncHandler(
+  async (req: Request<{}, {}, {}, UserFilters>, res: Response) => {
+    const { partial, ...rest } = req.query;
+    const partialSearch = parseBoolean(partial);
 
-  if (!users) {
-    res.status(400);
+    const users = partialSearch
+      ? await User.find({
+          name: { $regex: rest.name, $options: "i" },
+        })
+          .limit(10)
+          .maxTimeMS(5000)
+          .exec()
+      : await User.find(rest);
+
+    if (!users) {
+      res.status(400);
+    }
+
+    res.status(200).json(users);
   }
-
-  res.status(200).json(users);
-});
+);
 
 const getReccomendedUsers = asyncHandler(
   async (req: Request, res: Response) => {
