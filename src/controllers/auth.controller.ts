@@ -35,8 +35,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
     "local",
     async (err: Error, user: Express.User | false | null) => {
       if (err || !user) {
-        const error = new Error("An error occurred.");
-        return next(error);
+        return res.status(422).json({ message: "Incorrect password" });
       }
       req.login(user, async () => {
         return res.json({ id: user._id, name: user.name, email: user.email });
