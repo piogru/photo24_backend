@@ -37,8 +37,8 @@ passport.use("local", authStrategyLocal);
 
 app.use(compression());
 app.use(helmet());
-app.use(rateLimiter);
 app.use(cors(corsOptions));
+app.use(rateLimiter);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
