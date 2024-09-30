@@ -151,7 +151,8 @@ const deletePost = asyncHandler(async (req: Request, res: Response) => {
     res.status(404).json({ message: `Post with id "${id}" not found.` });
     return;
   }
-  if (post.user !== user?._id) {
+
+  if (!post.user.equals(user?._id)) {
     res.status(401).json({ message: `User is not Post owner.` });
     return;
   }
