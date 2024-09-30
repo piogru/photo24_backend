@@ -100,10 +100,14 @@ const createPost = asyncHandler(async (req: Request, res: Response) => {
   }
 
   if (Array.isArray(req.files)) {
-    photos = req.files.map((file, index) => ({
-      url: file.path,
-      ...parsedFileInfo[index],
-    }));
+    photos = req.files.map((file, index) => {
+      console.log(file);
+      return {
+        url: file.path,
+        publicId: file.filename,
+        ...parsedFileInfo[index],
+      };
+    });
   } else {
     res.status(422).json({ message: "File error" });
     return;
