@@ -1,21 +1,14 @@
 import multer from "multer";
 import cloudinary from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
-import path from "path";
+
+const allowedFileTypes = ["image/png", "image/jpeg", "image/jpg"];
 
 export default function uploadMiddleware(folderName: string) {
   const storage = new CloudinaryStorage({
     cloudinary: cloudinary.v2,
-    params: (req, file) => {
-      const folderPath = `${folderName.trim()}`; // Update the folder path here
-      const fileExtension = path.extname(file.originalname).substring(1);
-      const publicId = `${file.fieldname}-${Date.now()}`;
-
-      return {
-        folder: folderPath,
-        public_id: publicId,
-        format: fileExtension,
-      };
+    params: {
+      folder: "photos",
     },
   });
 
@@ -23,6 +16,17 @@ export default function uploadMiddleware(folderName: string) {
     storage: storage,
     limits: {
       fileSize: 5 * 1024 * 1024, // keep images size < 5 MB
+    },
+    fileFilter: (req, file, cb) => {
+      if (Array.isArray(req.files) && req.files.length > 4) {
+        cb(new Error("Maximum of 4 photos allowed."));
+      } else {
+        if (allowedFileTypes.includes(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(new Error("Upload error"));
+        }
+      }
     },
   });
 }

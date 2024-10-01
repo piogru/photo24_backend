@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
+import cloudinary from "cloudinary";
 import Post, { PostInput } from "../models/post.model";
 import { IPhoto } from "../models/photo.model";
 import Comment from "../models/comment.model";
@@ -100,10 +101,13 @@ const createPost = asyncHandler(async (req: Request, res: Response) => {
   }
 
   if (Array.isArray(req.files)) {
-    photos = req.files.map((file, index) => ({
-      url: file.path,
-      ...parsedFileInfo[index],
-    }));
+    photos = req.files.map((file, index) => {
+      return {
+        url: file.path,
+        publicId: file.filename,
+        ...parsedFileInfo[index],
+      };
+    });
   } else {
     res.status(422).json({ message: "File error" });
     return;
@@ -151,10 +155,23 @@ const deletePost = asyncHandler(async (req: Request, res: Response) => {
     res.status(404).json({ message: `Post with id "${id}" not found.` });
     return;
   }
-  if (post.user !== user?._id) {
+  if (!post.user.equals(user?._id)) {
     res.status(401).json({ message: `User is not Post owner.` });
     return;
   }
+
+  const destroyPromises = post.photos.map((photo) => {
+    return cloudinary.v2.uploader.destroy(photo.publicId);
+  });
+
+  await Promise.all(destroyPromises)
+    .then((res) => {})
+    .catch((error) => {
+      res
+        .status(502)
+        .json({ message: `Failed to delete one or more photos from post.` });
+      return;
+    });
 
   await User.findByIdAndUpdate(post.user, { $inc: { posts: -1 } });
   await post.deleteOne();

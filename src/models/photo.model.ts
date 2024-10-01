@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 
 interface IPhoto {
+  publicId: string;
   url: string;
   altText: string;
 }
@@ -12,6 +13,11 @@ type PhotoInput = {
 
 const photoSchema = new Schema<IPhoto>(
   {
+    publicId: {
+      type: Schema.Types.String,
+      required: true,
+      unique: true,
+    },
     url: {
       type: Schema.Types.String,
       required: true,
