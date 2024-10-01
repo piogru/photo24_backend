@@ -10,14 +10,14 @@ export default function uploadMiddleware(folderName: string) {
   const storage = new CloudinaryStorage({
     cloudinary: cloudinary.v2,
     params: {
-      folder: "photos",
+      folder: folderName,
     },
   });
 
   return multer({
     storage: storage,
     limits: {
-      fileSize: IMAGE_MAX_SIZE, // keep images size < 5 MB
+      fileSize: IMAGE_MAX_SIZE,
     },
     fileFilter: (req, file, cb) => {
       if (Array.isArray(req.files) && req.files.length > IMAGE_LIMIT) {
