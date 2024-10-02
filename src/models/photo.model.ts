@@ -3,7 +3,7 @@ import mongoose, { Schema } from "mongoose";
 interface IPhoto {
   publicId: string;
   url: string;
-  altText: string;
+  altText?: string;
 }
 
 type PhotoInput = {
