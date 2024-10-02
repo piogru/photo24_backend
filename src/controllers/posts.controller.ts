@@ -12,7 +12,7 @@ const getAllPosts = asyncHandler(async (req: Request, res: Response) => {
   const query = req.query;
   const posts = await Post.find(query)
     .sort("-createdAt")
-    .populate("user", ["_id", "name"])
+    .populate("user", ["_id", "name", "profilePic"])
     .exec();
 
   res.status(200).json(posts);
@@ -72,7 +72,7 @@ const getFollowingPosts = asyncHandler(async (req: Request, res: Response) => {
 const getPost = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
   const post = await Post.findOne({ _id: id })
-    .populate("user", ["_id", "name"])
+    .populate("user", ["_id", "name", "profilePic"])
     .exec();
 
   if (!post) {
