@@ -21,7 +21,7 @@ postsRouter.get("/", getAllPosts);
 postsRouter.get("/for-you", getForYouPosts);
 postsRouter.get("/following", getFollowingPosts);
 postsRouter.get("/:id", getPost);
-postsRouter.post("/", upload.array("photos[]", 4), createPost);
+postsRouter.post("/", upload.array("photos[]"), createPost);
 postsRouter.put("/:id", updatePost);
 postsRouter.delete("/:id", deletePost);
 

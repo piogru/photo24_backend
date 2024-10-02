@@ -46,10 +46,10 @@ const loginUser = asyncHandler(async (req, res, next) => {
 
 // /me
 const getUser = asyncHandler(async (req: Request, res: Response) => {
-  const user = req.user;
+  const user = await User.findById(req.user?._id);
 
   if (user) {
-    res.status(200).json({ _id: user._id, name: user.name, email: user.email });
+    res.status(200).json(user);
   } else {
     res
       .status(400)

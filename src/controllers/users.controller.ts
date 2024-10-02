@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import cloudinary from "cloudinary";
 import asyncHandler from "express-async-handler";
 import User from "../models/user.model";
 import { parseBoolean } from "../utils/query.util";
@@ -74,4 +75,74 @@ const getUser = asyncHandler(async (req: Request, res: Response) => {
   res.status(501).json({ message: "Not implemented" });
 });
 
-export { getUsers, getReccomendedUsers, getUser };
+const updateSelf = asyncHandler(async (req: Request, res: Response) => {
+  const { description } = req.body;
+  const file = req.file;
+  const user = await User.findById(req.user?._id);
+
+  if (!req.file) {
+    res.status(422).json({ message: "No file uploaded" });
+    return;
+  }
+  if (!user) {
+    res.status(401).json({ message: "Could not identify user" });
+    return;
+  }
+
+  // if file changes - remove old photo from Cloudinary
+  if (file && user.profilePic) {
+    await cloudinary.v2.uploader
+      .destroy(user.profilePic.publicId)
+      .then(() => {})
+      .catch(() => {
+        res
+          .status(502)
+          .json({ message: `Failed to delete old profile picture.` });
+        return;
+      });
+  }
+
+  // update user
+  const updateObject = {
+    ...(description && { description }),
+    ...(file && {
+      profilePic: {
+        url: file.path,
+        publicId: file.filename,
+      },
+    }),
+  };
+  await user.updateOne(updateObject);
+
+  const userUpdated = await User.findById(user._id);
+
+  res.status(200).json(userUpdated);
+});
+
+const deleteProfilePic = asyncHandler(async (req: Request, res: Response) => {
+  const user = await User.findById(req.user?._id);
+
+  if (!user) {
+    res.status(401).json({ message: "Could not identify user." });
+    return;
+  }
+  if (!user.profilePic) {
+    res.status(404).json({ message: "User has no profile picture." });
+    return;
+  }
+
+  await cloudinary.v2.uploader
+    .destroy(user.profilePic.publicId)
+    .then(() => {})
+    .catch(() => {
+      res.status(502).json({ message: `Failed to delete profile picture.` });
+      return;
+    });
+
+  user.profilePic = undefined;
+  await user.save();
+
+  res.status(200).json(user);
+});
+
+export { getUsers, getReccomendedUsers, getUser, updateSelf, deleteProfilePic };
