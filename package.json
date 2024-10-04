@@ -1,6 +1,9 @@
 {
   "name": "photo-backend",
-  "version": "1.0.0",
+  "version": "0.1.0",
+  "engines": {
+    "node": ">=20.15.1"
+  },
   "main": "app.js",
   "scripts": {
     "start": "tsx --env-file=.env --watch ./src/app.ts",
