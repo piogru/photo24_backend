@@ -30,12 +30,17 @@ export const createPostSchema = z.object({
     .object({
       caption: z.string().max(2500),
       fileInfo: z.array(
-        z.object({
-          altText: z.string().max(128).optional(),
-        })
+        z
+          .string()
+          .transform((input) => JSON.parse(input))
+          .pipe(
+            z.object({
+              altText: z.string().max(128).optional(),
+            })
+          )
       ),
-      hideLikes: z.boolean(),
-      commentsOff: z.boolean(),
+      hideLikes: z.coerce.boolean(),
+      commentsOff: z.coerce.boolean(),
     })
     .strict(),
 });
