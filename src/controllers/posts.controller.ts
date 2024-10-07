@@ -7,6 +7,7 @@ import Comment from "../models/comment.model";
 import Like from "../models/like.model";
 import User from "../models/user.model";
 import Follow from "../models/follow.model";
+import { assertHasUser } from "../utils/user.util";
 
 const getAllPosts = asyncHandler(async (req: Request, res: Response) => {
   const query = req.query;
@@ -19,12 +20,8 @@ const getAllPosts = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const getForYouPosts = asyncHandler(async (req: Request, res: Response) => {
+  assertHasUser(req, res);
   const user = req.user;
-
-  if (!user) {
-    res.status(401).json({ message: "Could not identify user" });
-    return;
-  }
 
   const posts = await Post.find({
     createdAt: {
@@ -40,12 +37,8 @@ const getForYouPosts = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const getFollowingPosts = asyncHandler(async (req: Request, res: Response) => {
+  assertHasUser(req, res);
   const user = req.user;
-
-  if (!user) {
-    res.status(401).json({ message: "Could not identify user" });
-    return;
-  }
 
   const followsGrouped = await Follow.aggregate([
     { $match: { follower: user._id } },
@@ -84,21 +77,13 @@ const getPost = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const createPost = asyncHandler(async (req: Request, res: Response) => {
+  assertHasUser(req, res);
   const { caption, hideLikes, commentsOff, fileInfo } = req.body;
   const user = req.user;
   const parsedFileInfo = fileInfo.map((stringifiedObj: string) =>
     JSON.parse(stringifiedObj)
   );
   let photos: IPhoto[] = [];
-
-  if (!req.files) {
-    res.status(422).json({ message: "No file uploaded" });
-    return;
-  }
-  if (!user) {
-    res.status(401).json({ message: "Could not identify user" });
-    return;
-  }
 
   if (Array.isArray(req.files)) {
     photos = req.files.map((file, index) => {
@@ -109,7 +94,7 @@ const createPost = asyncHandler(async (req: Request, res: Response) => {
       };
     });
   } else {
-    res.status(422).json({ message: "File error" });
+    res.status(422).json({ message: "No files provided" });
     return;
   }
 
@@ -128,8 +113,10 @@ const createPost = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const updatePost = asyncHandler(async (req: Request, res: Response) => {
+  assertHasUser(req, res);
   const { id } = req.params;
-  const { altText } = req.body;
+  const { caption } = req.body;
+  const user = req.user;
 
   const post = await Post.findOne({ _id: id });
 
@@ -137,10 +124,16 @@ const updatePost = asyncHandler(async (req: Request, res: Response) => {
     res.status(404).json({ message: `Post with id "${id}" not found.` });
     return;
   }
+  if (!post.user.equals(user?._id)) {
+    res.status(401).json({ message: `User is not Post owner.` });
+    return;
+  }
 
-  await Post.updateOne({ _id: id }, { altText: altText });
-
-  const photoUpdated = await Post.findById(id, { altText });
+  const photoUpdated = await Post.updateOne(
+    { _id: id },
+    { caption: caption },
+    { new: true }
+  );
 
   res.status(200).json(photoUpdated);
 });
@@ -180,17 +173,9 @@ const deletePost = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const getCurrentUserLike = asyncHandler(async (req: Request, res: Response) => {
+  assertHasUser(req, res);
   const { targetId } = req.params;
   const user = req.user;
-
-  if (!targetId) {
-    res.status(422).json({ message: "No like target specified" });
-    return;
-  }
-  if (!user) {
-    res.status(401).json({ message: "Could not identify user" });
-    return;
-  }
 
   const like = await Like.findOne({
     user: user._id,
@@ -201,13 +186,9 @@ const getCurrentUserLike = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const likePost = asyncHandler(async (req: Request, res: Response) => {
+  assertHasUser(req, res);
   const { targetId } = req.params;
   const user = req.user;
-
-  if (!user) {
-    res.status(401).json({ message: "Could not identify user" });
-    return;
-  }
 
   const like = await Like.findOne({ target: targetId, user: user?._id });
   const post = await Post.findById(targetId);
@@ -233,6 +214,7 @@ const likePost = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const unlikePost = asyncHandler(async (req: Request, res: Response) => {
+  assertHasUser(req, res);
   const { targetId } = req.params;
   const user = req.user;
 
@@ -250,19 +232,14 @@ const unlikePost = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const createComment = asyncHandler(async (req: Request, res: Response) => {
+  res.status(501).json({ message: "Not implemented" });
+  return;
+  assertHasUser(req, res);
   const { targetId } = req.params;
   const { content } = req.body;
   const user = req.user;
 
-  if (!req.files) {
-    res.status(422).json({ message: "No file uploaded" });
-    return;
-  }
-  if (!user) {
-    res.status(401).json({ message: "Could not identify user" });
-    return;
-  }
-
+  // todo: Add user to document
   const createdDocument = await Comment.create({
     content,
     target: targetId,
