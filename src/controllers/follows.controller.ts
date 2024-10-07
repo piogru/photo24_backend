@@ -2,20 +2,13 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import Follow, { FollowInput } from "../models/follow.model";
 import User from "../models/user.model";
+import { assertHasUser } from "../utils/user.util";
 
 const getCurrentUserFollow = asyncHandler(
   async (req: Request, res: Response) => {
+    assertHasUser(req, res);
     const { targetId } = req.params;
     const user = req.user;
-
-    if (!targetId) {
-      res.status(422).json({ message: "No follow target specified" });
-      return;
-    }
-    if (!user) {
-      res.status(401).json({ message: "Could not identify user" });
-      return;
-    }
 
     const follow = await Follow.findOne({
       follower: user._id,
@@ -44,17 +37,10 @@ const getFollowing = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const follow = asyncHandler(async (req: Request, res: Response) => {
+  assertHasUser(req, res);
   const { targetId } = req.params;
   const user = req.user;
 
-  if (!targetId) {
-    res.status(422).json({ message: "No follow target specified" });
-    return;
-  }
-  if (!user) {
-    res.status(401).json({ message: "Could not identify user" });
-    return;
-  }
   if (targetId === user._id.toString()) {
     res.status(422).json({ message: "Cannot follow self" });
     return;
@@ -82,17 +68,9 @@ const follow = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const unfollow = asyncHandler(async (req: Request, res: Response) => {
+  assertHasUser(req, res);
   const { targetId } = req.params;
   const user = req.user;
-
-  if (!targetId) {
-    res.status(422).json({ message: "No follow target specified" });
-    return;
-  }
-  if (!user) {
-    res.status(401).json({ message: "Could not identify user" });
-    return;
-  }
 
   await Follow.findOneAndDelete({ follower: user?._id, target: targetId });
   await User.findOneAndUpdate({ _id: user._id }, { $dec: { following: -1 } });

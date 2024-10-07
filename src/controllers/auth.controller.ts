@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import User from "../models/user.model";
 import passport from "passport";
+import { assertHasUser } from "../utils/user.util";
 
 const signupUser = asyncHandler(async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
@@ -46,6 +47,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
 
 // /me
 const getUser = asyncHandler(async (req: Request, res: Response) => {
+  assertHasUser(req, res);
   const user = await User.findById(req.user?._id);
 
   if (user) {
