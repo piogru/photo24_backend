@@ -4,8 +4,8 @@ import { userSchema } from "./user.schema";
 export const signupUserSchema = z.object({
   body: z
     .object({
-      userId: z.string().max(128),
       email: z.string().email().max(128),
+      name: z.string().max(128),
       password: z.string().max(128),
     })
     .strict(),

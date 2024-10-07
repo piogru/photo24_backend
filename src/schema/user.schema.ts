@@ -1,6 +1,5 @@
 import { Types } from "mongoose";
 import { z } from "zod";
-import { parseBoolean } from "../utils/query.util";
 
 export const userSchema = z.object(
   {

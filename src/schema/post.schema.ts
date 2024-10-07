@@ -1,11 +1,10 @@
-import { Types } from "mongoose";
 import { z } from "zod";
 import { userSchema } from "./user.schema";
 
 export const getAllPostsSchema = z.object({
   query: z
     .object({
-      user: z.instanceof(Types.ObjectId).optional(),
+      user: z.string().optional(),
     })
     .strict(),
 });
@@ -21,7 +20,7 @@ export const getFollowingPostsSchema = z.object({
 export const getPostSchema = z.object({
   params: z
     .object({
-      id: z.instanceof(Types.ObjectId).optional(),
+      id: z.string().optional(),
     })
     .strict(),
 });
@@ -44,7 +43,7 @@ export const createPostSchema = z.object({
 export const updatePostSchema = z.object({
   params: z
     .object({
-      id: z.instanceof(Types.ObjectId).optional(),
+      id: z.string().optional(),
     })
     .strict(),
   body: z
@@ -65,7 +64,7 @@ export const updatePostSchema = z.object({
 export const deletePostSchema = z.object({
   params: z
     .object({
-      id: z.instanceof(Types.ObjectId).optional(),
+      id: z.string().optional(),
     })
     .strict(),
   user: userSchema.required(),
@@ -74,7 +73,7 @@ export const deletePostSchema = z.object({
 export const getCurrentUserLikeSchema = z.object({
   params: z
     .object({
-      targetId: z.instanceof(Types.ObjectId).optional(),
+      targetId: z.string().optional(),
     })
     .strict(),
   user: userSchema.required(),
@@ -83,7 +82,7 @@ export const getCurrentUserLikeSchema = z.object({
 export const likePostSchema = z.object({
   params: z
     .object({
-      targetId: z.instanceof(Types.ObjectId).optional(),
+      targetId: z.string().optional(),
     })
     .strict(),
   user: userSchema.required(),
@@ -92,7 +91,7 @@ export const likePostSchema = z.object({
 export const unlikePostSchema = z.object({
   params: z
     .object({
-      targetId: z.instanceof(Types.ObjectId).optional(),
+      targetId: z.string().optional(),
     })
     .strict(),
   user: userSchema.required(),
@@ -101,7 +100,7 @@ export const unlikePostSchema = z.object({
 export const createCommentSchema = z.object({
   params: z
     .object({
-      targetId: z.instanceof(Types.ObjectId).optional(),
+      targetId: z.string().optional(),
     })
     .strict(),
   body: z
