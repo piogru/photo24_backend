@@ -1,18 +1,26 @@
 import multer from "multer";
 import cloudinary from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
+import { Options } from "multer-storage-cloudinary";
+
+declare interface cloudinaryOptions extends Options {
+  params: {
+    folder: string;
+  };
+}
 
 const ALLOWED_FILE_TYPES = ["image/png", "image/jpeg", "image/jpg"];
 const IMAGE_MAX_SIZE = 5 * 1024 * 1024;
 const IMAGE_LIMIT = Number(process.env.CLOUDINARY_IMAGE_LIMIT);
 
 export default function uploadMiddleware(folderName: string) {
-  const storage = new CloudinaryStorage({
+  const multerOpts: cloudinaryOptions = {
     cloudinary: cloudinary.v2,
     params: {
       folder: folderName,
     },
-  });
+  };
+  const storage = new CloudinaryStorage(multerOpts);
 
   return multer({
     storage: storage,
