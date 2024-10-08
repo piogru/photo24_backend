@@ -41,6 +41,7 @@ app.use(cors(corsOptions));
 app.use(rateLimiter);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.set("trust proxy", 1);
 app.use(
   session({
     secret: sessionSecret,
@@ -51,6 +52,8 @@ app.use(
       secure: process.env.NODE_ENV !== "dev",
       sameSite: process.env.NODE_ENV !== "dev" ? "none" : "lax",
       httpOnly: true,
+      signed: true,
+      partitioned: true,
     },
   })
 );
