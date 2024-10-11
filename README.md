@@ -2,7 +2,7 @@
 
 ## Site link and server repo
 
-**Deployed site (Render):** https://photo24-frontend.onrender.com
+**Deployed site (Render):** https://photo24-frontend.onrender.com<br />
 Frontend repo: https://github.com/piogru/photo24_frontend/
 
 ## Description
