@@ -53,7 +53,7 @@ app.use(
       sameSite: process.env.NODE_ENV !== "dev" ? "none" : "lax",
       httpOnly: true,
       signed: true,
-      partitioned: true,
+      partitioned: process.env.NODE_ENV !== "dev" ? true : false,
     },
   })
 );
