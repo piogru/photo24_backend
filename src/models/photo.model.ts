@@ -17,11 +17,13 @@ const photoSchema = new Schema<IPhoto>(
       type: Schema.Types.String,
       required: true,
       unique: true,
+      sparse: true,
     },
     url: {
       type: Schema.Types.String,
       required: true,
       unique: true,
+      sparse: true,
     },
     altText: {
       type: Schema.Types.String,
