@@ -86,13 +86,28 @@ const createPost = asyncHandler(async (req: Request, res: Response) => {
   let photos: IPhoto[] = [];
 
   if (Array.isArray(req.files)) {
-    photos = req.files.map((file, index) => {
-      return {
-        url: file.path,
-        publicId: file.filename,
-        ...parsedFileInfo[index],
-      };
-    });
+    photos = await Promise.all(
+      req.files.map(async (file, index) => {
+        const metadata = await cloudinary.v2.uploader
+          .explicit(file.filename, { type: "upload", resource_type: "image" })
+          .then((res) => {
+            return res;
+          })
+          .catch((error) => {
+            res.status(502).json({ message: "Unable to upload file" });
+            return;
+          });
+
+        return {
+          url: file.path,
+          publicId: file.filename,
+          altText: parsedFileInfo[index].altText,
+          width: metadata.width,
+          height: metadata.height,
+          hwRatio: `${(metadata.height / metadata.width) * 100}%`,
+        };
+      })
+    );
   } else {
     res.status(422).json({ message: "No files provided" });
     return;
