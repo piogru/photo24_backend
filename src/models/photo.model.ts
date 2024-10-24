@@ -4,6 +4,10 @@ interface IPhoto {
   publicId: string;
   url: string;
   altText?: string;
+  aspectRatio?: string;
+  hwRatio: string;
+  width: number;
+  height: number;
 }
 
 type PhotoInput = {
@@ -29,6 +33,24 @@ const photoSchema = new Schema<IPhoto>(
       type: Schema.Types.String,
       required: false,
       default: "",
+    },
+    aspectRatio: {
+      type: Schema.Types.String,
+      enum: ["16/9", "4/3"],
+      required: false,
+    },
+    hwRatio: {
+      type: Schema.Types.String,
+      required: true,
+      default: "100%",
+    },
+    width: {
+      type: Schema.Types.Number,
+      required: true,
+    },
+    height: {
+      type: Schema.Types.Number,
+      required: true,
     },
   },
   {
