@@ -14,14 +14,14 @@ export interface Route {
 
 const routes: Route[] = [
   { url: "/auth", middlewares: [], router: authRouter },
-  { url: "/follows", middlewares: [authenticate], router: followsRouter },
-  { url: "/photos", middlewares: [authenticate], router: photosRouter },
-  { url: "/posts", middlewares: [authenticate], router: postsRouter },
-  {
-    url: "/users",
-    middlewares: [authenticate],
-    router: userRouter,
-  },
+  // { url: "/follows", middlewares: [authenticate], router: followsRouter },
+  // { url: "/photos", middlewares: [authenticate], router: photosRouter },
+  // { url: "/posts", middlewares: [authenticate], router: postsRouter },
+  // {
+  //   url: "/users",
+  //   middlewares: [authenticate],
+  //   router: userRouter,
+  // },
 ];
 
 export default routes;

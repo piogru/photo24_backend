@@ -3,6 +3,7 @@ import asyncHandler from "express-async-handler";
 import User from "../models/user.model";
 import passport from "passport";
 import { assertHasUser } from "../utils/user.util";
+import GuestSession from "../models/guestSession.model";
 
 const signupUser = asyncHandler(async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
@@ -39,35 +40,96 @@ const loginUser = asyncHandler(async (req, res, next) => {
         return res.status(422).json({ message: "Incorrect password" });
       }
       req.login(user, async () => {
-        return res.json({ id: user._id, name: user.name, email: user.email });
+        return res.json({
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: "User",
+        });
       });
     }
   )(req, res, next);
 });
 
+const loginAnonymous = asyncHandler(async (req, res, next) => {
+  if (req.isAuthenticated()) {
+    res.status(400).json({ message: "User already authenticated" });
+    return;
+  }
+
+  req.session.regenerate((err) => {
+    if (err) {
+      next(err);
+    }
+  });
+  const session = await GuestSession.findById(req.sessionID);
+  if (session) {
+    res.status(400).json({ message: "User already authenticated" });
+    return;
+  }
+
+  const newSession = await GuestSession.create({
+    _id: req.sessionID,
+    expires: new Date(new Date().getTime() + 1209600000),
+    session: JSON.stringify(req.session),
+  });
+
+  if (newSession) {
+    res.json({ id: null, name: null, email: null, role: "Anonymous" });
+    return;
+  }
+  res.status(500).json({ message: "Failed to create guest session" });
+});
+
 // /me
 const getUser = asyncHandler(async (req: Request, res: Response) => {
-  assertHasUser(req, res);
-  const user = await User.findById(req.user?._id);
-
-  if (user) {
+  if (req.user) {
+    const user = await User.findById(req.user?._id);
     res.status(200).json(user);
+    return;
   } else {
-    res
-      .status(400)
-      .json({ message: "An error occurred while fetching the user" });
+    const session = await GuestSession.findById(req.sessionID);
+
+    if (session) {
+      res.json({ id: null, name: null, email: null, role: "Anonymous" });
+      return;
+    }
   }
+
+  res.status(400).json({ message: "User not logged in" });
 });
 
 const logoutUser = asyncHandler(
-  (req: Request, res: Response, next: NextFunction) => {
-    req.logout((err) => {
-      if (err) {
-        return next(err);
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (req.isAuthenticated()) {
+      req.logout((err) => {
+        if (err) {
+          return next(err);
+        }
+
+        res.status(200).json({ message: "User logged out" });
+        return;
+      });
+      return;
+    } else {
+      const session = await GuestSession.findById(req.sessionID);
+
+      if (session) {
+        await session.deleteOne();
+        req.logout((err) => {
+          if (err) {
+            return next(err);
+          }
+        });
+
+        res.status(200).json({ message: "Guest logged out" });
+        return;
       }
-      res.status(200).json({ message: "User logged out" });
-    });
+    }
+
+    res.status(400).json({ message: "No user was logged in" });
+    return;
   }
 );
 
-export { signupUser, loginUser, getUser, logoutUser };
+export { signupUser, loginUser, loginAnonymous, getUser, logoutUser };

@@ -6,9 +6,9 @@ const authenticate = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     if (req.isAuthenticated()) {
       return next();
-    } else {
-      throw new AuthenticationError("User not found");
     }
+
+    throw new AuthenticationError("User not found");
   }
 );
 
