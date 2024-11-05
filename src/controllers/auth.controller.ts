@@ -74,7 +74,7 @@ const loginAnonymous = asyncHandler(async (req, res, next) => {
   });
 
   if (newSession) {
-    res.json({ id: null, name: "Guest", email: null, role: "Anonymous" });
+    res.json({ id: null, name: "Guest", email: null, role: "Guest" });
     return;
   }
   res.status(500).json({ message: "Failed to create guest session" });
@@ -90,7 +90,7 @@ const getUser = asyncHandler(async (req: Request, res: Response) => {
     const session = await GuestSession.findById(req.sessionID);
 
     if (session) {
-      res.json({ id: null, name: "Guest", email: null, role: "Anonymous" });
+      res.json({ id: null, name: "Guest", email: null, role: "Guest" });
       return;
     }
   }
