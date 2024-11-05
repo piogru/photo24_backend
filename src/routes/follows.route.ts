@@ -14,12 +14,13 @@ import {
   getFollowingSchema,
   unfollowSchema,
 } from "../schema/follow.schema";
+import { authorize } from "../middlewares/auth.middleware";
 
 const followsRouter = express.Router();
 
 followsRouter.get(
   "/:targetId",
-  validateResource(getCurrentUserFollowSchema),
+  [authorize, validateResource(getCurrentUserFollowSchema)],
   getCurrentUserFollow
 );
 followsRouter.get(
@@ -32,7 +33,15 @@ followsRouter.get(
   validateResource(getFollowingSchema),
   getFollowing
 );
-followsRouter.post("/:targetId", validateResource(followSchema), follow);
-followsRouter.delete("/:targetId", validateResource(unfollowSchema), unfollow);
+followsRouter.post(
+  "/:targetId",
+  [authorize, validateResource(followSchema)],
+  follow
+);
+followsRouter.delete(
+  "/:targetId",
+  [authorize, validateResource(unfollowSchema)],
+  unfollow
+);
 
 export default followsRouter;

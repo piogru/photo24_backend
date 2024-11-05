@@ -8,6 +8,7 @@ import Like from "../models/like.model";
 import User from "../models/user.model";
 import Follow from "../models/follow.model";
 import { assertHasUser } from "../utils/user.util";
+import { Types } from "mongoose";
 
 const getAllPosts = asyncHandler(async (req: Request, res: Response) => {
   const query = req.query;
@@ -20,14 +21,18 @@ const getAllPosts = asyncHandler(async (req: Request, res: Response) => {
 });
 
 const getForYouPosts = asyncHandler(async (req: Request, res: Response) => {
-  assertHasUser(req, res);
   const user = req.user;
+  let userFilter: Types.ObjectId[] = [];
+
+  if (user) {
+    userFilter = [user._id];
+  }
 
   const posts = await Post.find({
     createdAt: {
       $gte: new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 3),
     },
-    user: { $nin: [user._id] },
+    user: { $nin: userFilter },
   })
     .sort("-createdAt")
     .populate("user", ["_id", "name", "profilePic"])

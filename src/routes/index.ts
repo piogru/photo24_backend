@@ -1,5 +1,6 @@
 import { RequestHandler, Router } from "express";
-import { authenticate } from "../middlewares/auth.middleware";
+import passport from "passport";
+import { authorize } from "../middlewares/auth.middleware";
 import photosRouter from "./photos.route";
 import authRouter from "./auth.route";
 import userRouter from "./users.route";
@@ -14,14 +15,26 @@ export interface Route {
 
 const routes: Route[] = [
   { url: "/auth", middlewares: [], router: authRouter },
-  // { url: "/follows", middlewares: [authenticate], router: followsRouter },
-  // { url: "/photos", middlewares: [authenticate], router: photosRouter },
-  // { url: "/posts", middlewares: [authenticate], router: postsRouter },
-  // {
-  //   url: "/users",
-  //   middlewares: [authenticate],
-  //   router: userRouter,
-  // },
+  {
+    url: "/follows",
+    middlewares: [passport.authenticate(["session", "anonymous"])],
+    router: followsRouter,
+  },
+  {
+    url: "/photos",
+    middlewares: [passport.authenticate(["session", "anonymous"], authorize)],
+    router: photosRouter,
+  },
+  {
+    url: "/posts",
+    middlewares: [passport.authenticate(["session", "anonymous"])],
+    router: postsRouter,
+  },
+  {
+    url: "/users",
+    middlewares: [passport.authenticate(["session", "anonymous"])],
+    router: userRouter,
+  },
 ];
 
 export default routes;
