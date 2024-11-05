@@ -23,7 +23,9 @@ const signupUser = asyncHandler(async (req: Request, res: Response) => {
 
   if (user) {
     req.login(user, async () => {
-      res.status(201).json({ id: user.id, name: user.name, role: UserRole.User});
+      res
+        .status(201)
+        .json({ id: user.id, name: user.name, role: UserRole.User });
     });
   } else {
     res
@@ -98,8 +100,12 @@ const getUser = asyncHandler(async (req: Request, res: Response) => {
     const session = await GuestSession.findById(req.sessionID);
 
     if (session) {
-      res.json({ id: "", name: "Guest", role: UserRole.Guest });
-      return;
+      if (new Date(session.expires).getTime() - new Date().getTime()) {
+        res.json({ id: "", name: "Guest", role: UserRole.Guest });
+        return;
+      } else {
+        await session.deleteOne();
+      }
     }
   }
 
