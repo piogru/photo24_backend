@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import User from "../models/user.model";
 import passport from "passport";
-import { assertHasUser } from "../utils/user.util";
 import GuestSession from "../models/guestSession.model";
 
 const signupUser = asyncHandler(async (req: Request, res: Response) => {
@@ -75,7 +74,7 @@ const loginAnonymous = asyncHandler(async (req, res, next) => {
   });
 
   if (newSession) {
-    res.json({ id: null, name: null, email: null, role: "Anonymous" });
+    res.json({ id: null, name: "Guest", email: null, role: "Anonymous" });
     return;
   }
   res.status(500).json({ message: "Failed to create guest session" });
@@ -91,7 +90,7 @@ const getUser = asyncHandler(async (req: Request, res: Response) => {
     const session = await GuestSession.findById(req.sessionID);
 
     if (session) {
-      res.json({ id: null, name: null, email: null, role: "Anonymous" });
+      res.json({ id: null, name: "Guest", email: null, role: "Anonymous" });
       return;
     }
   }
