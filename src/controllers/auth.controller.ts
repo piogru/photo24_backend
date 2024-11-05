@@ -3,6 +3,7 @@ import asyncHandler from "express-async-handler";
 import User from "../models/user.model";
 import passport from "passport";
 import GuestSession from "../models/guestSession.model";
+import UserRole from "../types/user-role.type";
 
 const signupUser = asyncHandler(async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
@@ -22,7 +23,7 @@ const signupUser = asyncHandler(async (req: Request, res: Response) => {
 
   if (user) {
     req.login(user, async () => {
-      res.status(201).json({ id: user.id, name: user.name, email: user.email });
+      res.status(201).json({ id: user.id, name: user.name, role: UserRole.User});
     });
   } else {
     res
@@ -43,7 +44,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
           id: user._id,
           name: user.name,
           email: user.email,
-          role: "User",
+          role: UserRole.Guest,
         });
       });
     }
@@ -74,7 +75,7 @@ const loginAnonymous = asyncHandler(async (req, res, next) => {
   });
 
   if (newSession) {
-    res.json({ id: null, name: "Guest", email: null, role: "Guest" });
+    res.json({ id: "", name: "Guest", role: UserRole.Guest });
     return;
   }
   res.status(500).json({ message: "Failed to create guest session" });
@@ -83,14 +84,21 @@ const loginAnonymous = asyncHandler(async (req, res, next) => {
 // /me
 const getUser = asyncHandler(async (req: Request, res: Response) => {
   if (req.user) {
-    const user = await User.findById(req.user?._id);
-    res.status(200).json(user);
+    const user = await User.findById(req.user?._id)
+      .select("_id name profilePic")
+      .exec();
+
+    if (user) {
+      res.status(200).json({ ...user?.toJSON(), role: UserRole.User });
+    } else {
+      res.status(404).json({ message: "User not found" });
+    }
     return;
   } else {
     const session = await GuestSession.findById(req.sessionID);
 
     if (session) {
-      res.json({ id: null, name: "Guest", email: null, role: "Guest" });
+      res.json({ id: "", name: "Guest", role: UserRole.Guest });
       return;
     }
   }
