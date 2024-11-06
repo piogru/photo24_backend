@@ -59,28 +59,29 @@ const loginAnonymous = asyncHandler(async (req, res, next) => {
     return;
   }
 
-  req.session.regenerate((err) => {
+  await req.session.regenerate(async (err) => {
     if (err) {
       next(err);
     }
-  });
-  const session = await GuestSession.findById(req.sessionID);
-  if (session) {
-    res.status(400).json({ message: "User already authenticated" });
-    return;
-  }
 
-  const newSession = await GuestSession.create({
-    _id: req.sessionID,
-    expires: new Date(new Date().getTime() + 1209600000),
-    session: JSON.stringify(req.session),
-  });
+    const session = await GuestSession.findById(req.sessionID);
+    if (session) {
+      res.status(400).json({ message: "User already authenticated" });
+      return;
+    }
 
-  if (newSession) {
-    res.json({ id: "", name: "Guest", role: UserRole.Guest });
-    return;
-  }
-  res.status(500).json({ message: "Failed to create guest session" });
+    const newSession = await GuestSession.create({
+      _id: req.sessionID,
+      expires: new Date(new Date().getTime() + 1209600000),
+      session: JSON.stringify(req.session),
+    });
+
+    if (newSession) {
+      res.json({ id: "", name: "Guest", role: UserRole.Guest });
+      return;
+    }
+    res.status(500).json({ message: "Failed to create guest session" });
+  });
 });
 
 // /me
