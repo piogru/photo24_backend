@@ -13,6 +13,7 @@ import session from "express-session";
 import mongoStore from "./db/store.db";
 import mongoose from "mongoose";
 import rateLimiter from "./configs/rateLimit.conf";
+import AnonymousStrategy from "passport-anonymous";
 
 const useRouters = (app: Application, routes: Route[]) => {
   routes.forEach((route: Route) => {
@@ -34,6 +35,7 @@ cloudinary.v2.config(cloudinaryConfig);
 mongoose.Schema.Types.String.checkRequired((v) => typeof v === "string");
 
 passport.use("local", authStrategyLocal);
+passport.use("anonymous", new AnonymousStrategy.Strategy());
 
 app.use(compression());
 app.use(helmet());
@@ -57,7 +59,6 @@ app.use(
     },
   })
 );
-app.use(passport.authenticate("session"));
 
 app.disable("x-powered-by");
 

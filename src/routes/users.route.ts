@@ -15,6 +15,7 @@ import {
   getUsersSchema,
   updateSelfSchema,
 } from "../schema/user.schema";
+import { authorize } from "../middlewares/auth.middleware";
 
 const userRouter = express.Router();
 const upload = uploadMiddleware("profiles");
@@ -22,19 +23,18 @@ const upload = uploadMiddleware("profiles");
 userRouter.get("/", validateResource(getUsersSchema), getUsers);
 userRouter.get(
   "/recommended",
-  validateResource(getRecommendedUsersSchema),
+  [authorize, validateResource(getRecommendedUsersSchema)],
   getReccomendedUsers
 );
 userRouter.get("/:id", validateResource(getUserSchema), getUser);
 userRouter.patch(
   "/self",
-  validateResource(updateSelfSchema),
-  upload.single("photo"),
+  [authorize, validateResource(updateSelfSchema), upload.single("photo")],
   updateSelf
 );
 userRouter.delete(
   "/self/profilePic",
-  validateResource(deleteProfilePicSchema),
+  [authorize, validateResource(deleteProfilePicSchema)],
   deleteProfilePic
 );
 

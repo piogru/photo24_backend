@@ -20,6 +20,10 @@ export const loginUserSchema = z.object({
     .strict(),
 });
 
+export const loginAnonymousSchema = z.object({
+  body: z.object({}).strict(),
+});
+
 export const getUserSchema = z.object({
   user: userSchema.required(),
 });

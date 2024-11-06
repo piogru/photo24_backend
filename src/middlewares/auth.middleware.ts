@@ -2,14 +2,14 @@ import { Request, Response, NextFunction } from "express";
 import asyncHandler from "express-async-handler";
 import { AuthenticationError } from "./error.middleware";
 
-const authenticate = asyncHandler(
+const authorize = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     if (req.isAuthenticated()) {
       return next();
-    } else {
-      throw new AuthenticationError("User not found");
     }
+
+    throw new AuthenticationError("Login to access this resource");
   }
 );
 
-export { authenticate };
+export { authorize };
