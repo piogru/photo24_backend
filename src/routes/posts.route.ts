@@ -27,6 +27,7 @@ import {
   unlikePostSchema,
   updatePostSchema,
 } from "../schema/post.schema";
+import { authorize } from "../middlewares/auth.middleware";
 
 const postsRouter = express.Router();
 const upload = uploadMiddleware("photos");
@@ -39,33 +40,45 @@ postsRouter.get(
 );
 postsRouter.get(
   "/following",
-  validateResource(getFollowingPostsSchema),
+  [authorize, validateResource(getFollowingPostsSchema)],
   getFollowingPosts
 );
 postsRouter.get("/:id", validateResource(getPostSchema), getPost);
 postsRouter.post(
   "/",
-  [upload.array("photos[]"), validateResource(createPostSchema)],
+  [authorize, upload.array("photos[]"), validateResource(createPostSchema)],
   createPost
 );
-postsRouter.put("/:id", validateResource(updatePostSchema), updatePost);
-postsRouter.delete("/:id", validateResource(deletePostSchema), deletePost);
+postsRouter.put(
+  "/:id",
+  [authorize, validateResource(updatePostSchema)],
+  updatePost
+);
+postsRouter.delete(
+  "/:id",
+  [authorize, validateResource(deletePostSchema)],
+  deletePost
+);
 
 postsRouter.get(
   "/:targetId/like",
-  validateResource(getCurrentUserLikeSchema),
+  [authorize, validateResource(getCurrentUserLikeSchema)],
   getCurrentUserLike
 );
-postsRouter.post("/:targetId/like", validateResource(likePostSchema), likePost);
+postsRouter.post(
+  "/:targetId/like",
+  [authorize, validateResource(likePostSchema)],
+  likePost
+);
 postsRouter.delete(
   "/:targetId/like",
-  validateResource(unlikePostSchema),
+  [authorize, validateResource(unlikePostSchema)],
   unlikePost
 );
 
 postsRouter.post(
   "/:targetId/comment",
-  validateResource(createCommentSchema),
+  [authorize, validateResource(createCommentSchema)],
   createComment
 );
 
