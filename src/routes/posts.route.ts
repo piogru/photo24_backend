@@ -21,7 +21,6 @@ import {
   getAllPostsSchema,
   getCurrentUserLikeSchema,
   getFollowingPostsSchema,
-  getForYouPostsSchema,
   getPostSchema,
   likePostSchema,
   unlikePostSchema,
@@ -33,11 +32,7 @@ const postsRouter = express.Router();
 const upload = uploadMiddleware("photos");
 
 postsRouter.get("/", validateResource(getAllPostsSchema), getAllPosts);
-postsRouter.get(
-  "/for-you",
-  validateResource(getForYouPostsSchema),
-  getForYouPosts
-);
+postsRouter.get("/for-you", getForYouPosts);
 postsRouter.get(
   "/following",
   [authorize, validateResource(getFollowingPostsSchema)],

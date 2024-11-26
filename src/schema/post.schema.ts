@@ -9,10 +9,6 @@ export const getAllPostsSchema = z.object({
     .strict(),
 });
 
-export const getForYouPostsSchema = z.object({
-  user: userSchema.required(),
-});
-
 export const getFollowingPostsSchema = z.object({
   user: userSchema.required(),
 });
