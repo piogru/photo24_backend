@@ -4,7 +4,7 @@
   "engines": {
     "node": ">=20.15.1"
   },
-  "main": "app.js",
+  "main": "app.ts",
   "scripts": {
     "start": "tsx --env-file=.env --watch ./src/app.ts",
     "build": "tsc",
